@@ -10,10 +10,10 @@ export default async function Home() {
   const githubUrl =
     "https://github.com/webdiego/next.js-drizzle-turso-lucia.git";
 
-  // const { user } = await validateRequest();
-  // if (user) {
-  //   return redirect("/dashboard");
-  // }
+  const { user } = await validateRequest();
+  if (user) {
+    return redirect("/dashboard");
+  }
 
   return (
     <div className=" w-full flex md:items-center md:justify-center antialiased  relative overflow-hidden">
