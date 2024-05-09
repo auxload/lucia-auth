@@ -1,10 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { validateRequest } from "@/lib/lucia/lucia";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Spotlight } from "@/components/Spotlight";
 import { CopyToClipboard } from "@/components/CopyToClipboard";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
 
 export default async function Home() {
   const githubUrl =
@@ -23,13 +24,19 @@ export default async function Home() {
         </h1>
 
         <p className="mt-4 font-normal text-base  max-w-lg text-center mx-auto">
-          Includes Sign In,Sign Up,Forgot Password,Verify Account via Email and Google auth{" "}
+          Includes Sign In,Sign Up,Forgot Password,Verify Account via Email and
+          Google auth{" "}
         </p>
         <div className="mt-10 flex flex-col items-center ">
           <p className=" font-semibold text-sm text-center">
             Just try the template, sign up and start building your app.
           </p>
-          
+          <Link
+            className={cn(buttonVariants({ variant: "default" }),"m-5")}
+            href={"/dashboard"}
+          >
+            See your dashboard
+          </Link>
         </div>
       </div>
     </div>
