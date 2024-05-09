@@ -16,8 +16,8 @@ const Header = ({children}:{children:ReactNode}) => {
     return null;
   }
   return (
-    <header className="border bg-background border-b sticky top-0 z-20">
-      <div className="container h-[3.5rem] flex items-center ">
+    <header className="border bg-background border-none sticky top-0 z-20">
+      <div className="container h-[4.5rem] flex items-center ">
         <Logo />
         <Navigation />
         <CTA className="hidden md:flex gap-2" hide="hidden "/>
@@ -56,14 +56,14 @@ export function CTA({className,hide}:{className?:string ;hide?:string} ) {
 
       <Link
         className={cn(
-          buttonVariants({ size: "sm", variant: "ghost" }),
+          buttonVariants({ size: "sm", variant: "default" }),
           "text-xs"
         )}
         href={"/sign-in"}
       >
         Sign In
       </Link>
-      <Link
+      {/* <Link
         className={cn(
           buttonVariants({ size: "sm", variant: "default" }),
           "text-xs"
@@ -71,7 +71,7 @@ export function CTA({className,hide}:{className?:string ;hide?:string} ) {
         href={"/sign-up"}
       >
         Sign Up
-      </Link>
+      </Link> */}
     </div>
   );
 }

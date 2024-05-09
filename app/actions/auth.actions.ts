@@ -32,20 +32,22 @@ export const signUp = async (
   credentials: z.infer<typeof signUpFormSchema>
 ): Promise<AuthAction> => {
   // Validate data
-  try {
-    signUpFormSchema.parse(credentials);
-  } catch (error) {
-    if (error instanceof z.ZodError)
-      return {
-        success: false,
-        message: error.message,
-      };
+  const {
+    success,
+    error,
+    data: validatedData,
+  } = signUpFormSchema.safeParse(credentials);
+  if (!success) {
+    return {
+      success: success,
+      message: error.issues[0].message,
+    };
   }
 
   // Check if user already exists
   const userAlreadyExist = await db.user.findUnique({
     where: {
-      username: credentials.username,
+      username: validatedData.username,
     },
   });
 
@@ -57,7 +59,7 @@ export const signUp = async (
   }
 
   // Hasing password
-  const hashedPassword = await argon2.hash(credentials.password);
+  const hashedPassword = await argon2.hash(validatedData.password);
   const userId = generateId(15);
 
   try {
@@ -65,20 +67,20 @@ export const signUp = async (
     await db.user.create({
       data: {
         id: userId,
-        username: credentials.username,
+        username: validatedData.username,
         password: hashedPassword,
-        email: credentials.email,
+        email: validatedData.email,
       },
     });
 
     // Generate verification Code
     const verificationCode = await generateEmailVerificationCode(
       userId,
-      credentials.email
+      validatedData.email
     );
 
     // sends email
-    await sendEmail(verificationCode, credentials.email);
+    await sendEmail(verificationCode, validatedData.email);
 
     //Creating session
     const session = await lucia.createSession(userId, {});
@@ -88,16 +90,9 @@ export const signUp = async (
       sessionCookie.value,
       sessionCookie.attributes
     );
-    new Response(null, {
-      status: 302,
-      headers: {
-        Location: "/",
-        "Set-Cookie": sessionCookie.serialize(),
-      },
-    });
     return {
       success: true,
-      message: "Account created Succesfuly!",
+      message: "Account created successfuly!",
     };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -279,7 +274,7 @@ export const forgotPassword = async (
 
   const verificationToken = await createPasswordResetToken(user.id);
   const verificationLink =
-    "http://localhost:3000/reset-password/" + verificationToken;
+    "https://lucia-auth-ten.vercel.app/reset-password/" + verificationToken;
 
   // await sendPasswordResetToken(email, verificationLink);
   console.log(verificationLink);

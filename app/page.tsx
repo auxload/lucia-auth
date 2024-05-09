@@ -24,10 +24,6 @@ export default async function Home() {
 
         <p className="mt-4 font-normal text-base  max-w-lg text-center mx-auto">
           Includes Sign In,Sign Up,Forgot Password,Verify Account via Email and Google auth{" "}
-          {/* <span className="font-bold">Next.js, </span>
-          <span className="font-bold">Lucia, </span>
-          <span className="font-bold">Prisma ORM, </span>and
-          <span className="font-bold"> Turso</span>. */}
         </p>
         <div className="mt-10 flex flex-col items-center ">
           <p className=" font-semibold text-sm text-center">
