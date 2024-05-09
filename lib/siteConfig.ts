@@ -1,12 +1,12 @@
 export const navLinks = [
   {
+    label: "Home",
+    path: "/",
+  },
+  {
     label: "Dashboard",
     path: "/dashboard",
     secure: true,
-  },
-  {
-    label: "Home",
-    path: "/",
   },
   {
     label: "Features",
