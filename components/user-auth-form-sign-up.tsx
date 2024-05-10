@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { signUp } from "../app/actions/auth.actions";
+import {  signup } from "../app/actions/auth.actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -33,7 +33,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof signUpFormSchema>) {
-    const res = await signUp(values);
+    const res = await signup(values);
 
     if (res.success === false) {
       toast({
