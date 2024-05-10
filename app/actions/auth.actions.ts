@@ -42,16 +42,23 @@ export async function signup(
 
   const { email, password, username } = parsed.data;
 
-  const existingUser = await db.user.findUnique({
+  const existingUserByUsername = await db.user.findUnique({
     where: {
-      username,
-    },
+      username
+    }
+
+  });
+  const existingUserByEmail = await db.user.findUnique({
+    where: {
+      email
+    }
+
   });
 
-  if (existingUser) {
+  if (existingUserByUsername || existingUserByEmail) {
     return {
       success: false,
-      message: "Cannot create account with that email",
+      message: "Cannot create account with that email/username",
     };
   }
 
