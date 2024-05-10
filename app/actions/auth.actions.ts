@@ -57,14 +57,22 @@ export async function signup(
 
   const userId = generateId(21);
   const hashedPassword = await argon2.hash(password);
-  await db.user.create({
-    data: {
-      id: userId,
-      username: username,
-      password: hashedPassword,
-      email: email,
-    },
-  });
+  try {
+    await db.user.create({
+      data: {
+        id: userId,
+        username: username,
+        password: hashedPassword,
+        email: email,
+      },
+    });
+  } catch (error) {
+    return{
+      success:false,
+      message:JSON.stringify(error)
+    }
+  }
+
 
   const verificationCode = await generateEmailVerificationCode(userId, email);
   await sendEmail(verificationCode, email);
