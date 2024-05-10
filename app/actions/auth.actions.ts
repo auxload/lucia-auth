@@ -26,153 +26,63 @@ import { resetPasswordFormSchema } from "../profile/settings/page";
 import { sendEmail } from "@/lib/nodemailer";
 // import { generateIdFromEntropySize } from "lucia";
 
-export interface ActionResponse<T> {
-  fieldError?: Partial<Record<keyof T, string | undefined>>;
-  formError?: string;
-}
-
 type AuthAction = { success: boolean; message: string };
 
-export const signUp = async (
-  credentials: z.infer<typeof signUpFormSchema>
-): Promise<AuthAction> => {
-  // Validate data
-  const {
-    success,
-    error,
-    data: validatedData,
-  } = signUpFormSchema.safeParse(credentials);
-  if (!success) {
+export async function signup(
+  data: z.infer<typeof signUpFormSchema>
+): Promise<AuthAction> {
+  const parsed = signUpFormSchema.safeParse(data);
+  if (!parsed.success) {
+    const err = parsed.error.flatten();
     return {
-      success: success,
-      message: error.issues[0].message,
+      success: false,
+      message: err.formErrors[0],
     };
   }
 
-  // Check if user already exists
-  const userAlreadyExist = await db.user.findUnique({
+  const { email, password, username } = parsed.data;
+
+  const existingUser = await db.user.findUnique({
     where: {
-      username: validatedData.username,
+      username,
     },
   });
 
-  if (userAlreadyExist) {
+  if (existingUser) {
     return {
       success: false,
-      message: "User allready exist",
+      message: "Cannot create account with that email",
     };
   }
 
-  // Hasing password
-  const hashedPassword = await argon2.hash(validatedData.password);
-  const userId = generateId(15);
+  const userId = generateId(21);
+  const hashedPassword = await argon2.hash(password);
+  await db.user.create({
+    data: {
+      id: userId,
+      username: username,
+      password: hashedPassword,
+      email: email,
+    },
+  });
 
-  try {
-    // Create User in db
-    await db.user.create({
-      data: {
-        id: userId,
-        username: validatedData.username,
-        password: hashedPassword,
-        email: validatedData.email,
-      },
-    });
-
-    // Generate verification Code
-    const verificationCode = await generateEmailVerificationCode(
-      userId,
-      validatedData.email
-    );
-
-    // sends email
-    await sendEmail(verificationCode, validatedData.email);
-
-    //Creating session
-    const session = await lucia.createSession(userId, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
-    return {
-      success: true,
-      message: "Account created successfuly!",
-    };
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
-    return {
-      success: false,
-      message: "An error has ocuer! Please try again",
-    };
-  }
-};
-
-// export const signIn = async (
-//   credentials: z.infer<typeof signInFormSchema>
-// ): Promise<AuthAction> => {
-//   // Validate data
-//   try {
-//     signInFormSchema.parse(credentials);
-//   } catch (error) {
-//     if (error instanceof z.ZodError)
-//       return {
-//         success: false,
-//         message: error.message,
-//       };
-//   }
-
-//   const existingUser = await db.user.findUnique({
-//     where: {
-//       username: credentials.username,
-//     },
-//   });
-
-//   if (!existingUser) {
-//     return {
-//       success: false,
-//       message: "User not found",
-//     };
-//   }
-
-//   const isValidPassword = await argon2.verify(
-//     existingUser.password,
-//     credentials.password
-//   );
-
-//   if (!isValidPassword) {
-//     return {
-//       success: false,
-//       message: "Incorrect credentials",
-//     };
-//   }
-
-//   const session = await lucia.createSession(existingUser.id, {});
-
-//   const sessionCookie = lucia.createSessionCookie(session.id);
-
-//   cookies().set(
-//     sessionCookie.name,
-//     sessionCookie.value,
-//     sessionCookie.attributes
-//   );
-
-//   return {
-//     success: true,
-//     message: "Logged in successfully!",
-//   };
-// };
-
+  const verificationCode = await generateEmailVerificationCode(userId, email);
+  await sendEmail(verificationCode, email);
+  const session = await lucia.createSession(userId, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  cookies().set(
+    sessionCookie.name,
+    sessionCookie.value,
+    sessionCookie.attributes
+  );
+  return {
+    message: "User created! ✅",
+    success: true,
+  };
+}
 export async function login(
   data: z.infer<typeof signInFormSchema>
-): Promise<{ success: boolean; message: string }> {
-
-  
+): Promise<AuthAction> {
   const parsed = signInFormSchema.safeParse(data);
   if (!parsed.success) {
     const err = parsed.error.flatten();
@@ -219,10 +129,8 @@ export async function login(
     sessionCookie.value,
     sessionCookie.attributes
   );
-  return {success:true,
-  message:"Logged In successfuly!✅"};
+  return { success: true, message: "Logged In successfuly!✅" };
 }
-
 export const signOut = async (): Promise<AuthAction> => {
   try {
     const { session } = await validateRequest();
