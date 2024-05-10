@@ -26,6 +26,11 @@ import { resetPasswordFormSchema } from "../profile/settings/page";
 import { sendEmail } from "@/lib/nodemailer";
 // import { generateIdFromEntropySize } from "lucia";
 
+export interface ActionResponse<T> {
+  fieldError?: Partial<Record<keyof T, string | undefined>>;
+  formError?: string;
+}
+
 type AuthAction = { success: boolean; message: string };
 
 export const signUp = async (
@@ -108,60 +113,116 @@ export const signUp = async (
   }
 };
 
-export const signIn = async (
-  credentials: z.infer<typeof signInFormSchema>
-): Promise<AuthAction> => {
-  // Validate data
-  try {
-    signInFormSchema.parse(credentials);
-  } catch (error) {
-    if (error instanceof z.ZodError)
-      return {
-        success: false,
-        message: error.message,
-      };
+// export const signIn = async (
+//   credentials: z.infer<typeof signInFormSchema>
+// ): Promise<AuthAction> => {
+//   // Validate data
+//   try {
+//     signInFormSchema.parse(credentials);
+//   } catch (error) {
+//     if (error instanceof z.ZodError)
+//       return {
+//         success: false,
+//         message: error.message,
+//       };
+//   }
+
+//   const existingUser = await db.user.findUnique({
+//     where: {
+//       username: credentials.username,
+//     },
+//   });
+
+//   if (!existingUser) {
+//     return {
+//       success: false,
+//       message: "User not found",
+//     };
+//   }
+
+//   const isValidPassword = await argon2.verify(
+//     existingUser.password,
+//     credentials.password
+//   );
+
+//   if (!isValidPassword) {
+//     return {
+//       success: false,
+//       message: "Incorrect credentials",
+//     };
+//   }
+
+//   const session = await lucia.createSession(existingUser.id, {});
+
+//   const sessionCookie = lucia.createSessionCookie(session.id);
+
+//   cookies().set(
+//     sessionCookie.name,
+//     sessionCookie.value,
+//     sessionCookie.attributes
+//   );
+
+//   return {
+//     success: true,
+//     message: "Logged in successfully!",
+//   };
+// };
+
+export async function login(
+  data: z.infer<typeof signInFormSchema>
+): Promise<{ success: boolean; message: string }> {
+
+  
+  const parsed = signInFormSchema.safeParse(data);
+  if (!parsed.success) {
+    const err = parsed.error.flatten();
+    return {
+      success: false,
+      message: err.formErrors[0],
+    };
   }
+
+  const { username, password } = parsed.data;
 
   const existingUser = await db.user.findUnique({
     where: {
-      username: credentials.username,
+      username,
     },
   });
 
   if (!existingUser) {
     return {
       success: false,
-      message: "User not found",
+      message: "Incorrect email or password",
     };
   }
 
-  const isValidPassword = await argon2.verify(
-    existingUser.password,
-    credentials.password
-  );
-
-  if (!isValidPassword) {
+  if (!existingUser || !existingUser?.password) {
     return {
       success: false,
-      message: "Incorrect credentials",
+      message: "Incorrect email or password",
+    };
+  }
+
+  const validPassword = await argon2.verify(existingUser.password, password);
+  if (!validPassword) {
+    return {
+      success: false,
+      message: "Incorrect email or password",
     };
   }
 
   const session = await lucia.createSession(existingUser.id, {});
-
   const sessionCookie = lucia.createSessionCookie(session.id);
-
   cookies().set(
     sessionCookie.name,
     sessionCookie.value,
     sessionCookie.attributes
   );
+  return {success:true,
+  message:"Logged In successfuly!✅"};
+}
 
-  return {
-    success: true,
-    message: "Logged in successfully!",
-  };
-};
 export const signOut = async (): Promise<AuthAction> => {
   try {
     const { session } = await validateRequest();

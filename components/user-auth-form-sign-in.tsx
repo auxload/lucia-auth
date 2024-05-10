@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import { signIn } from "./../app/actions/auth.actions";
+import { login } from "./../app/actions/auth.actions";
 import { useRouter } from "next/navigation";
 import { signInFormSchema } from "@/schemas/auth.schema";
 import { Label } from "./ui/label";
@@ -37,7 +37,7 @@ export function SignInForm({ className, ...props }: UserAuthFormProps) {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof signInFormSchema>) {
-    const res = await signIn(values);
+    const res = await login(values);
     if (res.success === false) {
       toast({
         variant: "destructive",
