@@ -44,15 +44,13 @@ export async function signup(
 
   const existingUserByUsername = await db.user.findUnique({
     where: {
-      username
-    }
-
+      username,
+    },
   });
   const existingUserByEmail = await db.user.findUnique({
     where: {
-      email
-    }
-
+      email,
+    },
   });
 
   if (existingUserByUsername || existingUserByEmail) {
@@ -74,12 +72,11 @@ export async function signup(
       },
     });
   } catch (error) {
-    return{
-      success:false,
-      message:JSON.stringify(error)
-    }
+    return {
+      success: false,
+      message: JSON.stringify(error),
+    };
   }
-
 
   const verificationCode = await generateEmailVerificationCode(userId, email);
   await sendEmail(verificationCode, email);
@@ -251,8 +248,8 @@ export const forgotPassword = async (
   });
   if (!user || !user.email_verified) {
     return {
-      success: false,
-      message: "User not find with this email",
+      success: true,
+      message: "Email sent!✅",
     };
   }
 
@@ -261,11 +258,11 @@ export const forgotPassword = async (
     "https://lucia-auth-ten.vercel.app/reset-password/" + verificationToken;
 
   // await sendPasswordResetToken(email, verificationLink);
-  console.log(verificationLink);
-  await sendEmail(verificationLink, user.email);
+  // console.log(verificationLink);
+  await sendEmail(verificationLink, forgottenUserPassword.email);
   return {
     success: true,
-    message: "Password updated!",
+    message: "Email sent!✅",
   };
 };
 export const ConfirmResetPassword = async ({
