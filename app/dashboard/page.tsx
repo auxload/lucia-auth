@@ -7,6 +7,7 @@ import FormButton from "@/components/FormButton";
 import ClientExample from "@/components/ClientExample";
 import Section from "@/components/layouts/section";
 import Wrapper from "@/components/layouts/wrapper";
+import kassy from "@/public/only.jpg";
 export default async function ProfilePage() {
   const { user } = await validateRequest();
 
@@ -25,8 +26,12 @@ export default async function ProfilePage() {
             Protected <span className="font-bold">Server Component</span> route
           </p>
         </div>
-        <h1 className="text-4xl font-bold text-center">Welcome {user.username}</h1>
-        <p className="text-center text-foreground/50">You can now access protected routes</p>
+        <h1 className="text-4xl font-bold text-center">
+          Welcome {user.username}
+        </h1>
+        <p className="text-center text-foreground/50">
+          You can now access protected routes
+        </p>
       </Wrapper>
     </Section>
   );

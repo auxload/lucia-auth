@@ -55,8 +55,8 @@ export async function signup(
 
   if (existingUserByUsername || existingUserByEmail) {
     return {
-      message: "Please check your email! ✅",
-      success: true,
+      message: "This user allready exist! ",
+      success: false,
     };
   }
 
