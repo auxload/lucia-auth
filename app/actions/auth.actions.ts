@@ -55,8 +55,8 @@ export async function signup(
 
   if (existingUserByUsername || existingUserByEmail) {
     return {
-      success: false,
-      message: "Cannot create account with that email/username",
+      message: "Please check your email! ✅",
+      success: true,
     };
   }
 
@@ -88,7 +88,7 @@ export async function signup(
     sessionCookie.attributes
   );
   return {
-    message: "User created! ✅",
+    message: "Please check your email! ✅",
     success: true,
   };
 }
