@@ -48,7 +48,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
         // title: "Sign Up Succes ✅",
         description: res.message,
       });
-      push("/dashboard");
+      push("/");
     }
   }
   return (

@@ -94,9 +94,6 @@ export default function Page() {
       refresh();
     }
 
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
   }
   async function resetPasswordOnSubmit(
     values: z.infer<typeof resetPasswordFormSchema>

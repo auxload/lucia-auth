@@ -6,6 +6,8 @@ import { Spotlight } from "@/components/Spotlight";
 import { CopyToClipboard } from "@/components/CopyToClipboard";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
+import Section from "@/components/layouts/section";
+import Wrapper from "@/components/layouts/wrapper";
 
 export default async function Home() {
   const githubUrl =
@@ -17,28 +19,11 @@ export default async function Home() {
   }
 
   return (
-    <div className=" w-full flex md:items-center md:justify-center antialiased  relative overflow-hidden">
-      <div className="p-4 max-w-5xl mx-auto relative z-10 w-full pt-20 md:pt-0 flex flex-col items-center justify-center">
-        <h1 className="text-5xl lg:text-7xl font-bold text-center    ">
-          Auth Template with lucia
-        </h1>
-
-        <p className="mt-4 font-normal text-base  max-w-lg text-center mx-auto">
-          Includes Sign In,Sign Up,Forgot Password,Verify Account via Email and
-          Google auth{" "}
-        </p>
-        <div className="mt-10 flex flex-col items-center ">
-          <p className=" font-semibold text-sm text-center">
-            Just try the template, sign up and start building your app.
-          </p>
-          <Link
-            className={cn(buttonVariants({ variant: "default" }),"m-5")}
-            href={"/dashboard"}
-          >
-            Get started
-          </Link>
-        </div>
-      </div>
-    </div>
+    <Section className="grid place-content-center">
+      <Wrapper className="text-center flex gap-4 flex-col items-center">
+          <h1 className="text-7xl font-bold">Auth Template with <span className="text-primary underline">Lucia</span></h1>
+          <Link className={cn(buttonVariants({variant:"default"}),'w-max')} href={'/dashboard'}>Get Started</Link>
+      </Wrapper>
+    </Section>
   );
 }

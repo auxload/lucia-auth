@@ -42,7 +42,7 @@ export default async function RootLayout({
         >
           <SessionProvider value={session}>
             <Navbar/>
-            <main className=" antialiased  min-h-[80vh] flex items-center justify-center px-2">
+            <main className="antialiased">
               {children}
             </main>
             <Toaster />
