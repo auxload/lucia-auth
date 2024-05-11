@@ -15,7 +15,7 @@ const page = async () => {
     <AuthLayout
       labelExtLink="Sign Up"
       extLink="/sign-up"
-      title="SIGN IN"
+      title="Sign in"
       desc="Enter your credentials below to sign in."
     >
       <SignInForm />

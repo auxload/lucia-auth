@@ -35,7 +35,7 @@ export default async function Home() {
             className={cn(buttonVariants({ variant: "default" }),"m-5")}
             href={"/dashboard"}
           >
-            See your dashboard
+            Get started
           </Link>
         </div>
       </div>

@@ -10,17 +10,22 @@ import FormButton from "../FormButton";
 import { signOut } from "@/app/actions/auth.actions";
 import { ReactNode } from "react";
 
-const Header = ({children}:{children:ReactNode}) => {
+const Header = ({ children }: { children: ReactNode }) => {
   const path = usePathname();
-  if (path === "/sign-up" || path === "/sign-in" || path === "/reset-password" || path === "/verify-email") {
+  if (
+    path === "/sign-up" ||
+    path === "/sign-in" ||
+    path === "/reset-password" ||
+    path === "/verify-email"
+  ) {
     return null;
   }
   return (
     <header className="border bg-background border-none sticky top-0 z-20">
       <div className="container h-[4.5rem] flex items-center ">
         <Logo />
-        <Navigation />
-        <CTA className="hidden md:flex gap-2" hide="hidden "/>
+        <Navigation/>
+        <CTA className="hidden md:flex gap-2" hide="hidden " />
         <MobileNavigation />
         {children}
       </div>
@@ -30,19 +35,24 @@ const Header = ({children}:{children:ReactNode}) => {
 
 export function Logo() {
   return (
-    <div className="flex items-center space-x-2 mr-7">
-      <FlagIcon className="h-6 w-6" />
-      <Link className="font-semibold" href="/">
-        Acme Inc
+    <div className="flex  gap-2 mr-8 items-center">
+      <Link href={"/"}>
+        <FlagIcon className="h-8 w-8" />
       </Link>
     </div>
   );
 }
-export function CTA({className,hide}:{className?:string ;hide?:string} ) {
+export function CTA({
+  className,
+  hide,
+}: {
+  className?: string;
+  hide?: string;
+}) {
   const { user } = useSession();
   if (user) {
     return (
-      <form className={cn("",hide)} action={signOut}>
+      <form className={cn("", hide)} action={signOut}>
         <FormButton
           variant="outline"
           defaultText="Sign out"
@@ -52,8 +62,7 @@ export function CTA({className,hide}:{className?:string ;hide?:string} ) {
     );
   }
   return (
-    <div className={cn("",className)}>
-
+    <div className={cn("", className)}>
       <Link
         className={cn(
           buttonVariants({ size: "sm", variant: "default" }),

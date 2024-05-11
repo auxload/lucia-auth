@@ -45,7 +45,7 @@ const MobileNavigation = () => {
           <SheetHeader>
             <Link href={"/profile/settings"}>
               {user && (
-                <div className="flex  items-center pl-1 gap-3">
+                <div onClick={() => setSheetOpen(false)} className="flex  items-center pl-1 gap-3">
                   <Avatar className="size-12 ">
                     <AvatarImage
                       className="rounded-full"
@@ -53,7 +53,10 @@ const MobileNavigation = () => {
                     />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
-                  <span className="text-xl font-bold">{user.username}</span>
+                  <div className="flex flex-col justify-start items-start">
+                    <span className="text-xl font-bold">{user.username}</span>
+                    <span className="text-xs text-foreground/50 underline">Settings</span>
+                  </div>
                 </div>
               )}
             </Link>
