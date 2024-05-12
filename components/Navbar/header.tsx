@@ -21,8 +21,8 @@ const Header = ({ children }: { children: ReactNode }) => {
     return null;
   }
   return (
-    <header className="border bg-background border-none sticky top-0 z-20">
-      <div className="container h-14 flex items-center ">
+    <header className=" bg-background/65 border-none sticky top-0 z-20">
+      <div className="container h-20 flex items-center ">
         <Logo />
         <Navigation/>
         <CTA className="hidden md:flex gap-2" hide="hidden " />

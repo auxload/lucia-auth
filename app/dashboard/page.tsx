@@ -18,7 +18,7 @@ export default async function ProfilePage() {
     return redirect("/verify-email");
   }
   return (
-    <Section className="flex flex-col items-center justify-center space-y-8">
+    <Section className="min-h-[80vh] flex flex-col items-center justify-center space-y-8">
       <Wrapper className="grid justify-center gap-2">
         <div className="flex gap-2 items-center m-auto">
           <TargetIcon className="w-4 h-4" />

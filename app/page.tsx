@@ -8,6 +8,8 @@ import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import Section from "@/components/layouts/section";
 import Wrapper from "@/components/layouts/wrapper";
+import ParticlesComponent from '@/components/particles'
+import clsx from "clsx";
 
 export default async function Home() {
   const { user } = await validateRequest();
@@ -15,10 +17,11 @@ export default async function Home() {
     return redirect("/dashboard");
   }
   return (
-    <Section className="grid place-content-center">
+    <Section className="grid place-content-center min-h-[35rem]">
+      <ParticlesComponent id="particles" sex={"#FFFFFF"}/>
       <Wrapper className="text-center flex gap-4 flex-col items-center">
-        <h1 className="text-7xl font-bold">
-          Auth Template with
+        <h1 className=" text-4xl md:text-7xl font-bold">
+          Auth Template with {""}
           <span className="text-primary underline">Lucia</span>
         </h1>
         <Link
