@@ -1,5 +1,5 @@
 "use client";
-import { ConfirmResetPassword, ValidToken } from "@/app/actions/auth.actions";
+import { resetForgottenPassword } from "@/app/actions/auth.actions";
 import React, { useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,7 +45,7 @@ const ClientFORM = () => {
   async function onSubmit(
     values: z.infer<typeof confirmPasswordResetformSchema>
   ) {
-    const res = await ConfirmResetPassword({
+    const res = await resetForgottenPassword({
       values: { token: params.token as string, password: values.newPassword },
     });
     if (res.success) {

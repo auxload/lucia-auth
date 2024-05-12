@@ -14,18 +14,15 @@ import { isWithinExpirationDate } from "oslo";
 import { sha256 } from "oslo/crypto";
 import { encodeHex } from "oslo/encoding";
 import { redirect } from "next/navigation";
-import { Prisma } from "@prisma/client";
 import {
   signUpFormSchema,
   signInFormSchema,
   verifyCodeSchema,
   forgotPasswordFormSchema,
 } from "@/schemas/auth.schema";
-import { authConfig } from "@/auth.config";
 import { resetPasswordFormSchema } from "../profile/settings/page";
 import { sendEmail } from "@/lib/nodemailer";
-// import { generateIdFromEntropySize } from "lucia";
-
+import { createPasswordResetToken } from "@/lib/lucia/lucia";
 type AuthAction = { success: boolean; message: string };
 
 export async function signup(
@@ -47,6 +44,7 @@ export async function signup(
       username,
     },
   });
+
   const existingUserByEmail = await db.user.findUnique({
     where: {
       email,
@@ -55,13 +53,14 @@ export async function signup(
 
   if (existingUserByUsername || existingUserByEmail) {
     return {
-      message: "This user allready exist! ",
+      message: "This user allready exist!",
       success: false,
     };
   }
 
   const userId = generateId(21);
   const hashedPassword = await argon2.hash(password);
+
   try {
     await db.user.create({
       data: {
@@ -79,7 +78,6 @@ export async function signup(
   }
 
   const verificationCode = await generateEmailVerificationCode(userId, email);
-  console.log(verificationCode)
   await sendEmail(verificationCode, email);
   const session = await lucia.createSession(userId, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
@@ -89,7 +87,7 @@ export async function signup(
     sessionCookie.attributes
   );
   return {
-    message: "Please check your email! ✅",
+    message: "Please check your email!",
     success: true,
   };
 }
@@ -142,7 +140,7 @@ export async function login(
     sessionCookie.value,
     sessionCookie.attributes
   );
-  return { success: true, message: "Logged In successfuly!✅" };
+  return { success: true, message: "Logged In successfuly!" };
 }
 export const signOut = async (): Promise<AuthAction> => {
   try {
@@ -150,7 +148,7 @@ export const signOut = async (): Promise<AuthAction> => {
     if (!session) {
       return {
         success: false,
-        message: "Unauthorized",
+        message: "Session not found!",
       };
     }
 
@@ -167,44 +165,43 @@ export const signOut = async (): Promise<AuthAction> => {
   } catch (error: any) {
     return {
       success: false,
-      message: error?.message,
+      message: "Error signing out!",
     };
   }
 };
 
-export const verifyAccount = async (
+export const verifyEmail = async (
   verifyAccountCode: z.infer<typeof verifyCodeSchema>
 ) => {
-  try {
-    verifyCodeSchema.parse(verifyAccountCode);
-  } catch (error) {
-    if (error instanceof z.ZodError)
-      return {
-        success: false,
-        message: error.message,
-      };
+  const parsed = verifyCodeSchema.safeParse(verifyAccountCode);
+  if (!parsed.success) {
+    const err = parsed.error.flatten();
+    return {
+      success: false,
+      message: err.formErrors[0],
+    };
   }
-
+  const { code } = parsed.data;
   const { session } = await validateRequest();
   if (!session) {
     return {
       success: false,
-      message: "Neautorizat",
+      message: "No session found!",
     };
   }
   const { user } = await lucia.validateSession(session.id);
   if (!user) {
     return {
       success: false,
-      message: "Neautorizat",
+      message: "No user found!",
     };
   }
-  const validCode = await verifyVerificationCode(user, verifyAccountCode.code);
+  const validCode = await verifyVerificationCode(user, code);
 
   if (!validCode) {
     return {
       success: false,
-      message: "Wrong verifcation code or has expired",
+      message: "Wrong verifcation code or has expired!",
     };
   }
 
@@ -216,57 +213,54 @@ export const verifyAccount = async (
       email_verified: true,
     },
   });
-  const session2 = await lucia.createSession(user.id, {});
+  const newSession = await lucia.createSession(user.id, {});
 
-  const sessionCookie = lucia.createSessionCookie(session2.id);
+  const sessionCookie = lucia.createSessionCookie(newSession.id);
 
   cookies().set(
     sessionCookie.name,
     sessionCookie.value,
     sessionCookie.attributes
   );
-
-  new Response(null, {
-    status: 302,
-    headers: {
-      Location: "/",
-      "Set-Cookie": sessionCookie.serialize(),
-    },
-  });
   return {
     success: true,
     message: "Account verified!",
   };
 };
 
-export const forgotPassword = async (
+export const sendforgotPasswordEmailCode = async (
   forgottenUserPassword: z.infer<typeof forgotPasswordFormSchema>
 ) => {
+  const parsed = forgotPasswordFormSchema.safeParse(forgottenUserPassword);
+  if (!parsed.success) {
+    const err = parsed.error.flatten();
+    return {
+      success: false,
+      message: err.formErrors[0],
+    };
+  }
+  const { email } = parsed.data;
   const user = await db.user.findUnique({
     where: {
-      email: forgottenUserPassword.email,
+      email,
     },
   });
   if (!user || !user.email_verified) {
     return {
       success: true,
-      message: "Email sent!✅",
+      message: "Email sent!",
     };
   }
-
   const verificationToken = await createPasswordResetToken(user.id);
   const verificationLink =
     "https://lucia-auth-ten.vercel.app/reset-password/" + verificationToken;
-
-  // await sendPasswordResetToken(email, verificationLink);
-  // console.log(verificationLink);
-  await sendEmail(verificationLink, forgottenUserPassword.email);
+  await sendEmail(verificationLink, email);
   return {
     success: true,
-    message: "Email sent!✅",
+    message: "Email sent!",
   };
 };
-export const ConfirmResetPassword = async ({
+export const resetForgottenPassword = async ({
   values,
 }: {
   values: { token: string; password: string };
@@ -321,10 +315,9 @@ export const ConfirmResetPassword = async ({
     message: "Done",
   };
 };
-export const ValidToken = async ({ values }: { values: { token: string } }) => {
-  const verificationToken = values.token;
+export const isForgotPasswordTokenValid = async (paramsToken: string) => {
   const tokenHash = encodeHex(
-    await sha256(new TextEncoder().encode(verificationToken))
+    await sha256(new TextEncoder().encode(paramsToken))
   );
   const token = await db.passwordResetTokens.findUnique({
     where: { token_hash: tokenHash },
@@ -332,7 +325,7 @@ export const ValidToken = async ({ values }: { values: { token: string } }) => {
   if (!token) {
     return {
       success: false,
-      message: "Invalid Token ❌",
+      message: "Invalid token!",
     };
   }
   if (!isWithinExpirationDate(token.expires_at)) {
@@ -343,35 +336,16 @@ export const ValidToken = async ({ values }: { values: { token: string } }) => {
     });
     return {
       success: false,
-      message: "Invalid Token",
+      message: "Invalid token!",
     };
   }
   return {
     success: true,
-    message: "Valid Token ✅",
+    message: "Token valid!",
   };
 };
 
-async function createPasswordResetToken(userId: string): Promise<string> {
-  const tokenId = generateId(40); // 40 character
-  const tokenHash = encodeHex(await sha256(new TextEncoder().encode(tokenId)));
-  await db.passwordResetTokens.create({
-    data: {
-      token_hash: tokenHash,
-      user_id: userId,
-      expires_at: new Date(
-        new Date().setTime(
-          new Date().getTime() +
-            authConfig.tokenForgotPasswordExpInterval * 60 * 1000
-        )
-      ),
-    },
-  });
-  return tokenId;
-}
-
 export async function resendCodeVerification() {
-  // Generate verification Code
   const { user } = await validateRequest();
   if (!user) {
     return {

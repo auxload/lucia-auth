@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import { REGEXP_ONLY_DIGITS, REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import { resendCodeVerification, verifyAccount } from "../actions/auth.actions";
+import { resendCodeVerification, verifyEmail } from "../actions/auth.actions";
 import { useSession } from "@/contexts/session-provider";
 import { redirect, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
-import { generateEmailVerificationCode } from "@/lib/lucia/lucia";
 import { ReactNode, useState } from "react";
 export const formSchemaCode = z.object({
   code: z.string().min(8, "Enter the code you recived in your email").max(9),
@@ -45,7 +44,7 @@ export default function VerifyEmail() {
     },
   });
   async function onSubmit(values: z.infer<typeof formSchemaCode>) {
-    const res = await verifyAccount(values);
+    const res = await verifyEmail(values);
     if (res.success === false) {
       toast({
         variant: "destructive",

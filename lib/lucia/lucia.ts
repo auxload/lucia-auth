@@ -1,7 +1,9 @@
-import { Lucia } from "lucia";
+import { Lucia, generateId } from "lucia";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { Session, User } from "lucia";
+import { sha256 } from "oslo/crypto";
+import { encodeHex } from "oslo/encoding";
 import adapter from "./adapter";
 import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
 import { generateRandomString, alphabet } from "oslo/crypto";
@@ -110,6 +112,24 @@ export async function verifyVerificationCode(
     return false;
   }
   return true;
+}
+
+export async function createPasswordResetToken(userId: string): Promise<string> {
+  const tokenId = generateId(40); // 40 character
+  const tokenHash = encodeHex(await sha256(new TextEncoder().encode(tokenId)));
+  await db.passwordResetTokens.create({
+    data: {
+      token_hash: tokenHash,
+      user_id: userId,
+      expires_at: new Date(
+        new Date().setTime(
+          new Date().getTime() +
+            authConfig.tokenForgotPasswordExpInterval * 60 * 1000
+        )
+      ),
+    },
+  });
+  return tokenId;
 }
 
 declare module "lucia" {

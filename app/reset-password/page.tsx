@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { forgotPassword } from "../actions/auth.actions";
+import {  sendforgotPasswordEmailCode } from "../actions/auth.actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,7 +30,7 @@ const Page = () => {
     },
   });
   async function onSubmit(values: z.infer<typeof resetPasswordFormSchema>) {
-    const res = await forgotPassword(values);
+    const res = await sendforgotPasswordEmailCode(values);
 
     if (res.success === false) {
       toast({
