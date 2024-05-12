@@ -13,6 +13,7 @@ import { validateRequest } from "@/lib/lucia/lucia";
 import FormButton from "../FormButton";
 import { signOut } from "@/app/actions/auth.actions";
 import Link from "next/link";
+import { ModeToggle } from "../darkThemeButton";
 
 const Profile = async () => {
   const { user } = await validateRequest();
@@ -20,8 +21,11 @@ const Profile = async () => {
     return null;
   }
   return (
+    <>
+          <ModeToggle/>
+
     <DropdownMenu>
-      <DropdownMenuTrigger className="hidden md:flex">
+      <DropdownMenuTrigger className="hidden md:flex ml-4">
         <ProfileAvatar />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -53,7 +57,7 @@ const Profile = async () => {
           </form>
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+    </DropdownMenu></>
   );
 };
 

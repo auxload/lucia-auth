@@ -8,7 +8,7 @@ interface SectionProp extends HTMLAttributes<HTMLDivElement> {
 
 const Section = ({className,children}:SectionProp) => {
   return (
-    <section className={cn("",className)}>
+    <section className={cn("py-20",className)}>
       {children}
     </section>
   )

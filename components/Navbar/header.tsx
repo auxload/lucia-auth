@@ -9,6 +9,7 @@ import { useSession } from "@/contexts/session-provider";
 import FormButton from "../FormButton";
 import { signOut } from "@/app/actions/auth.actions";
 import { ReactNode } from "react";
+import { ModeToggle } from "../darkThemeButton";
 
 const Header = ({ children }: { children: ReactNode }) => {
   const path = usePathname();
@@ -21,8 +22,8 @@ const Header = ({ children }: { children: ReactNode }) => {
     return null;
   }
   return (
-    <header className=" bg-background/65 border-none sticky top-0 z-20">
-      <div className="container h-20 flex items-center ">
+    <header className="bg-background/80 backdrop-blur-sm  border-b sticky top-0 z-20">
+      <div className="container h-16 flex items-center ">
         <Logo />
         <Navigation/>
         <CTA className="hidden md:flex gap-2" hide="hidden " />
@@ -63,24 +64,16 @@ export function CTA({
   }
   return (
     <div className={cn("", className)}>
+      <ModeToggle/>
       <Link
         className={cn(
           buttonVariants({ size: "sm", variant: "default" }),
-          "text-xs"
+          "text-xs ml-3"
         )}
         href={"/sign-in"}
       >
         Sign In
       </Link>
-      {/* <Link
-        className={cn(
-          buttonVariants({ size: "sm", variant: "default" }),
-          "text-xs"
-        )}
-        href={"/sign-up"}
-      >
-        Sign Up
-      </Link> */}
     </div>
   );
 }
